@@ -2,7 +2,7 @@ import { gql } from '@apollo/client'
 
 import { getLogger } from './helpers'
 import TtlCache from './ttl-cache'
-import { addresses, ARBITRUM, AVALANCHE } from './addresses'
+import { addresses, METERTEST } from './addresses'
 import { toReadable, sleep } from './utils'
 import { getPricesClient } from './graph'
 import { isEqual } from 'lodash'
@@ -32,8 +32,7 @@ const VALID_PERIODS = new Set(Object.keys(PERIOD_TO_SECONDS))
   }
 */
 const cachedPrices = {
-  [ARBITRUM]: {},
-  [AVALANCHE]: {}
+  [METERTEST]: {}
 }
 const candleByPriceId = {}
 // both Arbitrum and Avalanche don't have older prices
@@ -46,7 +45,7 @@ function putPricesIntoCache(prices, chainId, append) {
   if (!prices || !chainId) {
     throw new Error('Invalid arguments')
   }
-  
+
   let ret = true
   const groupByTokenAndPeriod = prices.reduce((acc, price) => {
     const token = price.token
@@ -78,17 +77,17 @@ function putPricesIntoCache(prices, chainId, append) {
     Date.now() - start,
     process.env.HOSTNAME
   )
-  
+
   return ret
 }
-  
+
 function priceToCandle(price) {
   return {
     t: price.timestamp,
-    o: Number((price.open / 1e30).toFixed(4)),
-    c: Number((price.close / 1e30).toFixed(4)),
-    h: Number((price.high / 1e30).toFixed(4)),
-    l: Number((price.low / 1e30).toFixed(4))
+    o: Number((price.open / 1e18).toFixed(4)),
+    c: Number((price.close / 1e18).toFixed(4)),
+    h: Number((price.high / 1e18).toFixed(4)),
+    l: Number((price.low / 1e18).toFixed(4))
   }
 }
 
@@ -129,7 +128,7 @@ function putPricesForTokenAndPeriodIntoCache(prices, chainId, token, period, app
       candleByPriceId[price.id] = candle
     }
   }
-  
+
   if (!IS_PRODUCTION) {
     let prev = null
     cachedPrices[chainId][token][period].forEach(p => {
@@ -167,12 +166,13 @@ function binSearchPrice(prices, timestamp, gt = true) {
   return ret
 }
 
-function getPricesLimit(limit, preferableChainId = ARBITRUM, symbol, period) {
+function getPricesLimit(limit, preferableChainId = METERTEST, symbol, period) {
+
   const prices = getPrices(preferableChainId, symbol, period)
   return prices.slice(Math.max(prices.length - limit, 0))
 }
 
-function getPricesFromTo(from, to, preferableChainId = ARBITRUM, symbol, period) {
+function getPricesFromTo(from, to, preferableChainId = METERTEST, symbol, period) {
   const start = Date.now()
   const cacheKey = `${from}:${to}:${preferableChainId}:${symbol}:${period}`
   const fromCache = ttlCache.get(cacheKey)
@@ -187,8 +187,9 @@ function getPricesFromTo(from, to, preferableChainId = ARBITRUM, symbol, period)
   return prices
 }
 
-function getPrices(preferableChainId = ARBITRUM, symbol, period) {
+function getPrices(preferableChainId = METERTEST, symbol, period) {
   const tokenAddress = addresses[preferableChainId][symbol]?.toLowerCase()
+  
   if (!tokenAddress) {
     return []
   }
@@ -201,7 +202,7 @@ function getPrices(preferableChainId = ARBITRUM, symbol, period) {
   if (!cachedPrices[preferableChainId][tokenAddress][period]) {
     return []
   }
-  
+
   return cachedPrices[preferableChainId][tokenAddress][period]
 }
 
@@ -213,7 +214,7 @@ async function loadNewPrices(chainId, period) {
   if (!chainId) {
     throw new Error('requires chainId')
   }
-  
+
   const getQuery = () => `{
     priceCandles(
       first: 100
@@ -291,6 +292,7 @@ async function loadOldPrices(chainId, period) {
       logger.info("requesting prices before %s", toReadable(before))
       const { data } = await graphClient.query({ query: gql(query) })
       logger.info("request done in %sms", Date.now() - start)
+      logger.info("ChainId %s", chainId)
       if (!data || !data.p0) {
         logger.info("No data returned. Break")
         break
@@ -321,7 +323,7 @@ async function loadOldPrices(chainId, period) {
       }
       before = prices[prices.length - 1].timestamp
       logger.info("New before: %s", toReadable(before))
-      
+
       await sleep(LOAD_OLD_PRICES_LOOP_INTERVAL)
     } catch (ex) {
       logger.warn("loop failed, sleep 15 seconds")
@@ -333,11 +335,8 @@ async function loadOldPrices(chainId, period) {
 
 if (IS_PRODUCTION || process.env.ENABLE_PRICES) {
   for (const period of Object.keys(PERIOD_TO_SECONDS)) {
-    loadNewPrices(ARBITRUM, period)
-    loadNewPrices(AVALANCHE, period)
-
-    loadOldPrices(ARBITRUM, period)
-    loadOldPrices(AVALANCHE, period)
+    loadNewPrices(METERTEST, period)
+    loadOldPrices(METERTEST, period)
   }
 }
 

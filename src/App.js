@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Route, Switch, NavLink } from 'react-router-dom';
 import { motion, AnimatePresence } from "framer-motion";
 import cx from "classnames";
-import Arbitrum from './views/Arbitrum';
 import Referrals from './views/Referrals';
-import Avalanche from './views/Avalanche';
+import Metertest from './views/Metertest';
 import Trading from './views/Trading';
 import './App.css';
 import logoIcon from './img/logo_GMX.svg';
@@ -28,7 +27,7 @@ function AppHeaderLinks({ mode, small, clickCloseIcon }) {
         </div>
       }
       <div className="App-header-link-container">
-        <NavLink to="/" exact className="nav-link" activeClassName="active">Arbitrum</NavLink>
+        <NavLink to="/" exact className="nav-link" activeClassName="active">Metertest</NavLink>
       </div>
       <div className="App-header-link-container">
         <NavLink to="/avalanche" className="nav-link">Avalanche</NavLink>
@@ -93,7 +92,7 @@ const App = () => {
               <a href="https://gmx.io" target="_blank" className="nav-logo">
                 <img width="87" src={mode == 'dark' ? darkLogoIcon : lightLogoIcon} />
               </a>
-              <NavLink to="/" exact className="nav-link" activeClassName="active">Arbitrum</NavLink>
+              <NavLink to="/" exact className="nav-link" activeClassName="active">Metertest</NavLink>
               <NavLink to="/avalanche" className="nav-link">Avalanche</NavLink>
             </div>
             <div className="nav-right">
@@ -121,7 +120,7 @@ const App = () => {
           </AnimatePresence>
           <div className="content">
             <Route exact path="/" render={(props) => (
-              <Arbitrum {...props} mode={mode} />
+              <Metertest {...props} mode={mode} />
             )} />
             <Route exact path="/avalanche" render={(props) => (
               <Avalanche {...props} mode={mode} />

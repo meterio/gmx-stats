@@ -5,7 +5,7 @@ import { ethers } from 'ethers'
 import strftime from 'strftime'
 import chalk from 'chalk'
 
-import { BSC, ARBITRUM } from './addresses'
+import { BSC, ARBITRUM, METERTEST } from './addresses'
 
 const { BigNumber } = ethers
 
@@ -189,7 +189,7 @@ export const tooltipLabelFormatter = (label, args) => {
     if (item && item.unit === '%') {
       return date
     }
-    return `${date}, ${formatNumber(all, {currency: true, compact: true})}`
+    return `${date}, ${formatNumber(all, { currency: true, compact: true })}`
   }
   return date
 }
@@ -221,44 +221,44 @@ export const tooltipFormatter = (value, name, item) => {
   return formatNumber(value, { currency: true })
 }
 
-export const convertToPercents = (data, {ignoreKeys = [], totalKey = 'all'} = {}) => {
+export const convertToPercents = (data, { ignoreKeys = [], totalKey = 'all' } = {}) => {
   // Not used in percentage evaluation
   const allIgnoredKeys = ignoreKeys.concat(totalKey);
 
   return data.map(item => {
-      const {
-          timestamp,
-          ...stats
-      } = item;
+    const {
+      timestamp,
+      ...stats
+    } = item;
 
-      let total = item[totalKey];
+    let total = item[totalKey];
 
-      if (typeof total !== 'number') {
-        // Calculate total from actual data if totalKey is not specified
-        total = Object.entries(stats).reduce((acc, [key, value]) => {
-          if (!allIgnoredKeys.includes(key)) {
-            acc += value;
-          }
-  
-          return acc;
-        }, 0)
+    if (typeof total !== 'number') {
+      // Calculate total from actual data if totalKey is not specified
+      total = Object.entries(stats).reduce((acc, [key, value]) => {
+        if (!allIgnoredKeys.includes(key)) {
+          acc += value;
+        }
+
+        return acc;
+      }, 0)
+    }
+
+    const formattedStats = Object.entries(stats).reduce((acc, [token, value]) => {
+      if (!allIgnoredKeys.includes(token)) {
+        acc[token] = (value / total) * 100;
+      } else {
+        acc[token] = value
       }
-      
-      const formattedStats = Object.entries(stats).reduce((acc, [token, value]) => {
-          if (!allIgnoredKeys.includes(token)) {
-            acc[token] = (value / total) * 100;
-          } else {
-            acc[token] = value
-          }
-          
-          return acc;
-      }, {})
 
-      return {
-          ...formattedStats,
-          [totalKey]: 100,
-          timestamp
-      }
+      return acc;
+    }, {})
+
+    return {
+      ...formattedStats,
+      [totalKey]: 100,
+      timestamp
+    }
   })
 }
 
@@ -312,6 +312,8 @@ export function getProvider(chainId) {
     rpc = 'https://bsc-dataseed1.defibit.io/'
   } else if (chainId === ARBITRUM) {
     rpc = 'https://arb1.arbitrum.io/rpc'
+  } else if (chainId === METERTEST) {
+    rpc = 'https://rpctest.meter.io'
   }
   if (!rpc) {
     throw Error(`Unsupported chainId: ${chainId}`)
@@ -328,7 +330,7 @@ export async function getLatestReliableBlock() {
 }
 
 export async function getLatestReliableBlockNumber() {
-    return (await provider.getBlockNumber()) - 3
+  return (await provider.getBlockNumber()) - 3
 }
 
 export function getTransaction(hash) {
@@ -348,18 +350,18 @@ export function getBlocks(numbers) {
 }
 
 export function findNearest(arr, needle, getter = el => el) {
-	let prevEl
-	for (const el of arr) {
-		if (getter(el) > needle) {
-			if (prevEl && getter(el) - needle > needle - getter(prevEl)) {
-				return prevEl
-			} else {
-				return el
-			}
-		}
-		prevEl = el
-	}
-	return prevEl
+  let prevEl
+  for (const el of arr) {
+    if (getter(el) > needle) {
+      if (prevEl && getter(el) - needle > needle - getter(prevEl)) {
+        return prevEl
+      } else {
+        return el
+      }
+    }
+    prevEl = el
+  }
+  return prevEl
 }
 
 async function callWithRetry(func, args, maxTries = 10) {
@@ -378,10 +380,10 @@ async function callWithRetry(func, args, maxTries = 10) {
 
 export async function queryProviderLogs({ fromBlock, toBlock, address, backwards }) {
   logger.info(`query logs fromBlock=%s toBlock=%s blocks length=%s backwards=%s`,
-  	fromBlock,
-  	toBlock,
-  	toBlock - fromBlock,
-  	backwards
+    fromBlock,
+    toBlock,
+    toBlock - fromBlock,
+    backwards
   )
   const allResult = []
   const MAX = 1000
@@ -390,11 +392,11 @@ export async function queryProviderLogs({ fromBlock, toBlock, address, backwards
   let chunkToBlock
 
   if (backwards) {
-  	chunkToBlock = toBlock
-  	chunkFromBlock = Math.max(fromBlock, toBlock - MAX)
+    chunkToBlock = toBlock
+    chunkFromBlock = Math.max(fromBlock, toBlock - MAX)
   } else {
-	  chunkFromBlock = fromBlock
-	  chunkToBlock = Math.min(toBlock, fromBlock + MAX)
+    chunkFromBlock = fromBlock
+    chunkToBlock = Math.min(toBlock, fromBlock + MAX)
   }
 
   let i = 0
@@ -406,7 +408,7 @@ export async function queryProviderLogs({ fromBlock, toBlock, address, backwards
       address
     }])
     if (backwards) {
-    	result = result.reverse()
+      result = result.reverse()
     }
     allResult.push(...result)
     i++
@@ -421,11 +423,11 @@ export async function queryProviderLogs({ fromBlock, toBlock, address, backwards
     }
 
     if (backwards) {
-	    chunkToBlock = chunkFromBlock - 1
-	    chunkFromBlock = Math.max(fromBlock, chunkFromBlock - MAX)
+      chunkToBlock = chunkFromBlock - 1
+      chunkFromBlock = Math.max(fromBlock, chunkFromBlock - MAX)
     } else {
-	    chunkFromBlock = chunkToBlock + 1
-	    chunkToBlock = Math.min(toBlock, chunkToBlock + MAX)
+      chunkFromBlock = chunkToBlock + 1
+      chunkToBlock = Math.min(toBlock, chunkToBlock + MAX)
     }
   }
 

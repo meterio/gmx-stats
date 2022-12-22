@@ -5,7 +5,7 @@ import fetch from 'cross-fetch';
 import * as ethers from 'ethers'
 
 import { fillPeriods } from './helpers'
-import { addresses, getAddress, ARBITRUM, AVALANCHE } from './addresses'
+import { addresses, getAddress, METERTEST } from './addresses'
 
 const BigNumber = ethers.BigNumber
 const formatUnits = ethers.utils.formatUnits
@@ -16,8 +16,7 @@ import GlpManager from '../abis/GlpManager.json'
 import Token from '../abis/v1/Token.json'
 
 const providers = {
-  arbitrum: new JsonRpcProvider('https://arb1.arbitrum.io/rpc'),
-  avalanche: new JsonRpcProvider('https://api.avax.network/ext/bc/C/rpc')
+  metertest: new JsonRpcProvider('https://rpctest.meter.io'),
 }
 
 function getProvider(chainName) {
@@ -29,8 +28,7 @@ function getProvider(chainName) {
 
 function getChainId(chainName) {
   const chainId = {
-    arbitrum: ARBITRUM,
-    avalanche: AVALANCHE
+    metertest: METERTEST
   }[chainName]
   if (!chainId) {
     throw new Error(`Unknown chain ${chainName}`)
@@ -75,14 +73,54 @@ export async function queryEarnData(chainName, account) {
   let rewardTrackersForDepositBalances
   let rewardTrackersForStakingInfo
 
-  if (chainId === ARBITRUM) {
-    depositTokens = ['0xfc5A1A6EB076a2C7aD06eD22C90d7E710E35ad0a', '0xf42Ae1D54fd613C9bb14810b0588FaAa09a426cA', '0x908C4D94D34924765f1eDc22A1DD098397c59dD4', '0x4d268a7d4C16ceB5a606c173Bd974984343fea13', '0x35247165119B69A40edD5304969560D0ef486921', '0x4277f8F2c384827B5273592FF7CeBd9f2C1ac258']
-    rewardTrackersForDepositBalances = ['0x908C4D94D34924765f1eDc22A1DD098397c59dD4', '0x908C4D94D34924765f1eDc22A1DD098397c59dD4', '0x4d268a7d4C16ceB5a606c173Bd974984343fea13', '0xd2D1162512F927a7e282Ef43a362659E4F2a728F', '0xd2D1162512F927a7e282Ef43a362659E4F2a728F', '0x4e971a87900b931fF39d1Aad67697F49835400b6']
-    rewardTrackersForStakingInfo = ['0x908C4D94D34924765f1eDc22A1DD098397c59dD4', '0x4d268a7d4C16ceB5a606c173Bd974984343fea13', '0xd2D1162512F927a7e282Ef43a362659E4F2a728F', '0x1aDDD80E6039594eE970E5872D247bf0414C8903', '0x4e971a87900b931fF39d1Aad67697F49835400b6']
+  if (chainId === METERTEST) {
+    depositTokens = [
+      '0x635bB9a3FeE749dcfC4beaE64DbcE7a24201C478',
+      '0x05ae61fabc5B1f8e3fD4507F0EdD790489673BFf',
+      '0x652Cb04Bb547a62b987Ce957331c4aEEe4f10238',
+      '0x6ECC12cE7a463b25AaD3d1973f3aFc09a6C5DfE5',
+      '0x9C85c45C1255F289BFd07d39DAed2973e7A9613a',
+      '0x11698092eeA7782a3d961F78f71C759664B6C718'
+    ]
+    rewardTrackersForDepositBalances = [
+      '0x652Cb04Bb547a62b987Ce957331c4aEEe4f10238',
+      '0x652Cb04Bb547a62b987Ce957331c4aEEe4f10238',
+      '0x6ECC12cE7a463b25AaD3d1973f3aFc09a6C5DfE5',
+      '0xa0c65e21C089E88F1EbF35D1B6659a80F748004D',
+      '0xa0c65e21C089E88F1EbF35D1B6659a80F748004D',
+      '0x7D14FE4777d04F4310Ce82352D6ea689c7e611E9'
+    ]
+    rewardTrackersForStakingInfo = [
+      '0x652Cb04Bb547a62b987Ce957331c4aEEe4f10238',
+      '0x6ECC12cE7a463b25AaD3d1973f3aFc09a6C5DfE5',
+      '0xa0c65e21C089E88F1EbF35D1B6659a80F748004D',
+      '0x423b30c19fEE35634EBa6C10C9885ddf9AF72531',
+      '0x7D14FE4777d04F4310Ce82352D6ea689c7e611E9'
+    ]
   } else {
-    depositTokens = ['0x62edc0692BD897D2295872a9FFCac5425011c661', '0xFf1489227BbAAC61a9209A08929E4c2a526DdD17', '0x2bD10f8E93B3669b6d42E74eEedC65dd1B0a1342', '0x908C4D94D34924765f1eDc22A1DD098397c59dD4', '0x8087a341D32D445d9aC8aCc9c14F5781E04A26d2', '0x01234181085565ed162a948b6a5e88758CD7c7b8']
-    rewardTrackersForDepositBalances = ['0x2bD10f8E93B3669b6d42E74eEedC65dd1B0a1342', '0x2bD10f8E93B3669b6d42E74eEedC65dd1B0a1342', '0x908C4D94D34924765f1eDc22A1DD098397c59dD4', '0x4d268a7d4C16ceB5a606c173Bd974984343fea13', '0x4d268a7d4C16ceB5a606c173Bd974984343fea13', '0xd2D1162512F927a7e282Ef43a362659E4F2a728F']
-    rewardTrackersForStakingInfo = ['0x2bD10f8E93B3669b6d42E74eEedC65dd1B0a1342', '0x908C4D94D34924765f1eDc22A1DD098397c59dD4', '0x4d268a7d4C16ceB5a606c173Bd974984343fea13', '0x9e295B5B976a184B14aD8cd72413aD846C299660', '0xd2D1162512F927a7e282Ef43a362659E4F2a728F']
+    depositTokens = [
+      '0x62edc0692BD897D2295872a9FFCac5425011c661', // GMX
+      '0xFf1489227BbAAC61a9209A08929E4c2a526DdD17', // esGMX
+      '0x2bD10f8E93B3669b6d42E74eEedC65dd1B0a1342', // sGMX
+      '0x908C4D94D34924765f1eDc22A1DD098397c59dD4', // sbGMX
+      '0x8087a341D32D445d9aC8aCc9c14F5781E04A26d2', // bnGMX
+      '0x01234181085565ed162a948b6a5e88758CD7c7b8' // GLP
+    ]
+    rewardTrackersForDepositBalances = [
+      '0x2bD10f8E93B3669b6d42E74eEedC65dd1B0a1342', // sGMX
+      '0x2bD10f8E93B3669b6d42E74eEedC65dd1B0a1342', // sGMX
+      '0x908C4D94D34924765f1eDc22A1DD098397c59dD4', // sbGMX
+      '0x4d268a7d4C16ceB5a606c173Bd974984343fea13', // sbfGMX
+      '0x4d268a7d4C16ceB5a606c173Bd974984343fea13', // sbfGMX
+      '0xd2D1162512F927a7e282Ef43a362659E4F2a728F' // fGLP
+    ]
+    rewardTrackersForStakingInfo = [
+      '0x2bD10f8E93B3669b6d42E74eEedC65dd1B0a1342', // sGMX
+      '0x908C4D94D34924765f1eDc22A1DD098397c59dD4', // sbGMX
+      '0x4d268a7d4C16ceB5a606c173Bd974984343fea13', // sbfGMX
+      '0x9e295B5B976a184B14aD8cd72413aD846C299660', // fsGLP
+      '0xd2D1162512F927a7e282Ef43a362659E4F2a728F' // fGLP
+    ]
   }
 
   const [
@@ -129,15 +167,8 @@ export async function queryEarnData(chainName, account) {
 }
 
 export const tokenDecimals = {
-  "0x82af49447d8a07e3bd95bd0d56f35241523fbab1": 18, // WETH
-  "0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f": 8, // BTC
-  "0xff970a61a04b1ca14834a43f5de4533ebddb5cc8": 6, // USDC
-  "0xfa7f8980b0f1e64a2062791cc3b0871572f1f7f0": 18, // UNI
-  "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9": 6, // USDT
-  "0xf97f4df75117a78c1a5a0dbb814af92458539fb4": 18, // LINK
-  "0xfea7a6a0b346362bf88a9e4a88416b77a57d6c2a": 18, // MIM
-  "0x17fc002b466eec40dae837fc4be5c67993ddbd6f": 18, // FRAX
-  "0xda10009cbd5d07dd0cecc66161fc93d7c9000da1": 18, // DAI
+  "0xfAC315d105E5A7fe2174B3EB1f95C257A9A5e271": 18, // WMTR
+  "0x8a419ef4941355476cf04933e90bf3bbf2f73814": 18, // MTRG
 }
 
 export const tokenSymbols = {
@@ -158,7 +189,10 @@ export const tokenSymbols = {
   '0x50b7545627a5162f82a992c33b87adc75187b218': 'WBTC.e',
   '0x130966628846bfd36ff31a822705796e8cb8c18d': 'MIM',
   '0xa7d7079b0fead91f3e65f86e8915cb59c1a4c664': 'USDC.e',
-  '0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e': 'USDC'
+  '0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e': 'USDC',
+  // MeterTest
+  '0xfAC315d105E5A7fe2174B3EB1f95C257A9A5e271': 'MTR',
+  '0x8a419ef4941355476cf04933e90bf3bbf2f73814': 'MTRG'
 }
 
 function getTokenDecimals(token) {
@@ -208,6 +242,14 @@ const knownSwapSources = {
     '0x2ecf2a2e74b19aab2a62312167aff4b78e93b6c5': 'ParaSwap',
     '0xdef1c0ded9bec7f1a1670819833240f027b25eff': '0x',
     '0xe547cadbe081749e5b3dc53cb792dfaea2d02fd2': 'GMX PositionExecutor' // Position Executor
+  },
+  metertest: {
+    '0x53f0C2a9e2eFE41cCA2964F124B3985aF4BE6cc8': 'GMX OrderBook',
+    '0x151A12e089a8d54925dDCd0045ac4070e2Da855c': 'GMX Router',
+    '0x582c81D3aD4ddbEFCa2f5670988799Aa240EF2c9': 'GMX FastPriceFeed', // FastPriceFeed
+    '0x88Ea74a03692CC6328d0AfCBbC227152Bf943468': 'GMX PositionManager', // PositionManager
+    '0x783fCA88c24a6a6a710375a51Ab18821FcEF2210': 'GMX PositionRouter C',
+    '0x582c81D3aD4ddbEFCa2f5670988799Aa240EF2c9': 'GMX PositionExecutor' // Position Executor
   }
 }
 
@@ -275,17 +317,17 @@ function getImpermanentLoss(change) {
 }
 
 function getChainSubgraph(chainName) {
-  return chainName === "arbitrum" ? "gmx-io/gmx-stats" : "gmx-io/gmx-avalanche-stats"
+  return chainName === "arbitrum" ? "gmx-io/gmx-stats" : "gmx/gmx-stats"
 }
 
-export function useGraph(querySource, { subgraph = null, subgraphUrl = null, chainName = "arbitrum" } = {}) {
+export function useGraph(querySource, { subgraph = null, subgraphUrl = null, chainName = "metertest" } = {}) {
   const query = gql(querySource)
 
   if (!subgraphUrl) {
     if (!subgraph) {
       subgraph = getChainSubgraph(chainName)
     }
-    subgraphUrl = `https://api.thegraph.com/subgraphs/name/${subgraph}`;
+    subgraphUrl = `http://graphtest.meter.io:8000/subgraphs/name/${subgraph}`;
   }
 
   const client = new ApolloClient({
@@ -301,7 +343,7 @@ export function useGraph(querySource, { subgraph = null, subgraphUrl = null, cha
   }, [querySource, setLoading])
 
   useEffect(() => {
-    client.query({query}).then(res => {
+    client.query({ query }).then(res => {
       setData(res.data)
       setLoading(false)
     }).catch(ex => {
@@ -328,7 +370,7 @@ export function useLastBlock(chainName = "arbitrum") {
   return [data, loading, error]
 }
 
-export function useLastSubgraphBlock(chainName = "arbitrum") {
+export function useLastSubgraphBlock(chainName = "metertest") {
   const [data, loading, error] = useGraph(`{
     _meta {
       block {
@@ -351,7 +393,7 @@ export function useLastSubgraphBlock(chainName = "arbitrum") {
   return [block, loading, error]
 }
 
-export function useTradersData({ from = FIRST_DATE_TS, to = NOW_TS, chainName = "arbitrum" } = {}) {
+export function useTradersData({ from = FIRST_DATE_TS, to = NOW_TS, chainName = "metertest" } = {}) {
   const [closedPositionsData, loading, error] = useGraph(`{
     tradingStats(
       first: 1000
@@ -376,7 +418,7 @@ export function useTradersData({ from = FIRST_DATE_TS, to = NOW_TS, chainName = 
     }
 
     let feesCumulative = 0
-    return feesData.reduce((memo, { timestamp, margin: fees}) => {
+    return feesData.reduce((memo, { timestamp, margin: fees }) => {
       feesCumulative += fees
       memo[timestamp] = {
         fees,
@@ -452,7 +494,7 @@ export function useTradersData({ from = FIRST_DATE_TS, to = NOW_TS, chainName = 
         Math.abs(maxCurrentCumulativePnl),
         Math.abs(minCurrentCumulativePnl)
       ),
-      
+
     }
 
     ret = {
@@ -480,7 +522,7 @@ function getSwapSourcesFragment(skip = 0, from, to) {
     }
   `
 }
-export function useSwapSources({ from = FIRST_DATE_TS, to = NOW_TS, chainName = "arbitrum" } = {}) {
+export function useSwapSources({ from = FIRST_DATE_TS, to = NOW_TS, chainName = "metertest" } = {}) {
   const query = `{
     a: ${getSwapSourcesFragment(0, from, to)}
     b: ${getSwapSourcesFragment(1000, from, to)}
@@ -495,7 +537,7 @@ export function useSwapSources({ from = FIRST_DATE_TS, to = NOW_TS, chainName = 
       return null
     }
 
-    const {a, b, c, d, e} = graphData
+    const { a, b, c, d, e } = graphData
     const all = [...a, ...b, ...c, ...d, ...e]
 
     const totalVolumeBySource = a.reduce((acc, item) => {
@@ -586,7 +628,7 @@ export function useVolumeDataRequest(url, defaultValue, from, to, fetcher = defa
   return [data, loading, error]
 }
 
-export function useVolumeDataFromServer({ from = FIRST_DATE_TS, to = NOW_TS, chainName = "arbitrum" } = {}) {
+export function useVolumeDataFromServer({ from = FIRST_DATE_TS, to = NOW_TS, chainName = "metertest" } = {}) {
   const PROPS = 'margin liquidation swap mint burn'.split(' ')
   const [data, loading] = useVolumeDataRequest(`https://${getServerHostname(chainName)}/daily_volume`, null, from, to, async url => {
     let after
@@ -665,7 +707,7 @@ export function useVolumeDataFromServer({ from = FIRST_DATE_TS, to = NOW_TS, cha
   return [ret, loading]
 }
 
-export function useUsersData({ from = FIRST_DATE_TS, to = NOW_TS, chainName = "arbitrum" } = {}) {
+export function useUsersData({ from = FIRST_DATE_TS, to = NOW_TS, chainName = "metertest" } = {}) {
   const query = `{
     userStats(
       first: 1000
@@ -718,7 +760,7 @@ export function useUsersData({ from = FIRST_DATE_TS, to = NOW_TS, chainName = "a
   return [data, loading, error]
 }
 
-export function useFundingRateData({ from = FIRST_DATE_TS, to = NOW_TS, chainName = "arbitrum" } = {}) {
+export function useFundingRateData({ from = FIRST_DATE_TS, to = NOW_TS, chainName = "metertest" } = {}) {
   const query = `{
     fundingRates(
       first: 1000,
@@ -764,7 +806,7 @@ export function useFundingRateData({ from = FIRST_DATE_TS, to = NOW_TS, chainNam
       group[symbol] = fundingRate
       return memo
     }, {})
-    
+
     return fillNa(sortBy(Object.values(groups), 'timestamp'))
   }, [graphData])
 
@@ -774,8 +816,8 @@ export function useFundingRateData({ from = FIRST_DATE_TS, to = NOW_TS, chainNam
 const MOVING_AVERAGE_DAYS = 7
 const MOVING_AVERAGE_PERIOD = 86400 * MOVING_AVERAGE_DAYS
 
-export function useVolumeData({ from = FIRST_DATE_TS, to = NOW_TS, chainName = "arbitrum" } = {}) {
-	const PROPS = 'margin liquidation swap mint burn'.split(' ')
+export function useVolumeData({ from = FIRST_DATE_TS, to = NOW_TS, chainName = "metertest" } = {}) {
+  const PROPS = 'margin liquidation swap mint burn'.split(' ')
   const timestampProp = chainName === "arbitrum" ? "id" : "timestamp"
   const query = `{
     volumeStats(
@@ -796,7 +838,7 @@ export function useVolumeData({ from = FIRST_DATE_TS, to = NOW_TS, chainName = "
       return null
     }
 
-    let ret =  sortBy(graphData.volumeStats, timestampProp).map(item => {
+    let ret = sortBy(graphData.volumeStats, timestampProp).map(item => {
       const ret = { timestamp: item[timestampProp] };
       let all = 0;
       PROPS.forEach(prop => {
@@ -829,7 +871,7 @@ export function useVolumeData({ from = FIRST_DATE_TS, to = NOW_TS, chainName = "
   return [data, loading, error]
 }
 
-export function useFeesData({ from = FIRST_DATE_TS, to = NOW_TS, chainName = "arbitrum" } = {}) {
+export function useFeesData({ from = FIRST_DATE_TS, to = NOW_TS, chainName = "metertest" } = {}) {
   const PROPS = 'margin liquidation swap mint burn'.split(' ')
   const feesQuery = `{
     feeStats(
@@ -892,7 +934,7 @@ export function useFeesData({ from = FIRST_DATE_TS, to = NOW_TS, chainName = "ar
           movingAverageAll
         }
         PROPS.forEach(prop => {
-           ret[prop] = sumBy(values, prop)
+          ret[prop] = sumBy(values, prop)
         })
         cumulativeByTs[timestamp] = cumulative
         return ret
@@ -919,7 +961,7 @@ export function useAumPerformanceData({ from = FIRST_DATE_TS, to = NOW_TS, group
     const ret = feesData.map((feeItem, i) => {
       const glpItem = glpData[i]
       const volumeItem = volumeData[i]
-      let apr = (feeItem?.all && glpItem?.aum) ? feeItem.all /  glpItem.aum * 100 * 365 * dailyCoef : null
+      let apr = (feeItem?.all && glpItem?.aum) ? feeItem.all / glpItem.aum * 100 * 365 * dailyCoef : null
       if (apr > 10000) {
         apr = null
       }
@@ -944,7 +986,7 @@ export function useAumPerformanceData({ from = FIRST_DATE_TS, to = NOW_TS, group
   return [data, feesLoading || glpLoading || volumeLoading]
 }
 
-export function useGlpData({ from = FIRST_DATE_TS, to = NOW_TS, chainName = "arbitrum" } = {}) {
+export function useGlpData({ from = FIRST_DATE_TS, to = NOW_TS, chainName = "metertest" } = {}) {
   const timestampProp = chainName === 'arbitrum' ? 'id' : 'timestamp'
   const query = `{
     glpStats(
@@ -1036,11 +1078,11 @@ export function useGlpData({ from = FIRST_DATE_TS, to = NOW_TS, chainName = "arb
     ret = fillNa(ret)
     return ret
   }, [data])
-  
+
   return [glpChartData, loading, error]
 }
 
-export function useGlpPerformanceData(glpData, feesData, { from = FIRST_DATE_TS, chainName = "arbitrum" } = {}) {
+export function useGlpPerformanceData(glpData, feesData, { from = FIRST_DATE_TS, chainName = "metertest" } = {}) {
   const [btcPrices] = useCoingeckoPrices('BTC', { from })
   const [ethPrices] = useCoingeckoPrices('ETH', { from })
   const [avaxPrices] = useCoingeckoPrices('AVAX', { from })
@@ -1109,7 +1151,7 @@ export function useGlpPerformanceData(glpData, feesData, { from = FIRST_DATE_TS,
 
       const glpPrice = glpItem?.glpPrice
       const glpSupply = glpItem?.glpSupply
-      
+
       const feesItem = feesDataById[timestampGroup] || lastFeesItem
       lastFeesItem = feesItem
 
@@ -1206,14 +1248,14 @@ export function useGlpPerformanceData(glpData, feesData, { from = FIRST_DATE_TS,
   return [glpPerformanceChartData]
 }
 
-export function useTokenStats({ 
+export function useTokenStats({
   from = FIRST_DATE_TS,
   to = NOW_TS,
   period = 'daily',
-  chainName = "arbitrum" 
+  chainName = "metertest"
 } = {}) {
 
-  const getTokenStatsFragment = ({skip = 0} = {}) => `
+  const getTokenStatsFragment = ({ skip = 0 } = {}) => `
     tokenStats(
       first: 1000,
       skip: ${skip},
@@ -1231,11 +1273,11 @@ export function useTokenStats({
   // Request more than 1000 records to retrieve maximum stats for period
   const query = `{
     a: ${getTokenStatsFragment()}
-    b: ${getTokenStatsFragment({skip: 1000})},
-    c: ${getTokenStatsFragment({skip: 2000})},
-    d: ${getTokenStatsFragment({skip: 3000})},
-    e: ${getTokenStatsFragment({skip: 4000})},
-    f: ${getTokenStatsFragment({skip: 5000})},
+    b: ${getTokenStatsFragment({ skip: 1000 })},
+    c: ${getTokenStatsFragment({ skip: 2000 })},
+    d: ${getTokenStatsFragment({ skip: 3000 })},
+    e: ${getTokenStatsFragment({ skip: 4000 })},
+    f: ${getTokenStatsFragment({ skip: 5000 })},
   }`
 
   const [graphData, loading, error] = useGraph(query, { chainName })
@@ -1253,7 +1295,7 @@ export function useTokenStats({
     const retrievedTokens = new Set();
 
     const timestampGroups = fullData.reduce((memo, item) => {
-      const {timestamp, token, ...stats} = item;
+      const { timestamp, token, ...stats } = item;
 
       const symbol = tokenSymbols[token] || token;
 
@@ -1271,15 +1313,15 @@ export function useTokenStats({
     const poolAmountUsdRecords = [];
 
     Object.entries(timestampGroups).forEach(([timestamp, dataItem]) => {
-        const poolAmountUsdRecord = Object.entries(dataItem).reduce((memo, [token, stats]) => {
-            memo.all += stats.poolAmountUsd;
-            memo[token] = stats.poolAmountUsd;
-            memo.timestamp = timestamp;
+      const poolAmountUsdRecord = Object.entries(dataItem).reduce((memo, [token, stats]) => {
+        memo.all += stats.poolAmountUsd;
+        memo[token] = stats.poolAmountUsd;
+        memo.timestamp = timestamp;
 
-            return memo;
-        }, {all: 0});
+        return memo;
+      }, { all: 0 });
 
-        poolAmountUsdRecords.push(poolAmountUsdRecord);
+      poolAmountUsdRecords.push(poolAmountUsdRecord);
     })
 
     return {
@@ -1291,7 +1333,7 @@ export function useTokenStats({
   return [data, loading, error]
 }
 
-export function useReferralsData({ from = FIRST_DATE_TS, to = NOW_TS, chainName = "arbitrum" } = {}) {
+export function useReferralsData({ from = FIRST_DATE_TS, to = NOW_TS, chainName = "metertest" } = {}) {
   const query = `{
     globalStats(
       first: 1000
@@ -1317,7 +1359,7 @@ export function useReferralsData({ from = FIRST_DATE_TS, to = NOW_TS, chainName 
   }`
   const subgraph = chainName === "arbitrum"
     ? "gmx-io/gmx-arbitrum-referrals"
-    : "gmx-io/gmx-avalanche-referrals"
+    : "gmx/gmx-referrals"
   const [graphData, loading, error] = useGraph(query, { subgraph })
 
   const data = graphData ? sortBy(graphData.globalStats, 'timestamp').map(item => {

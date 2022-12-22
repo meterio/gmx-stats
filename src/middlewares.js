@@ -33,7 +33,8 @@ export function csp(req, res, next) {
       "https://api.avax.network",
       "https://api.thegraph.com",
       "https://gmx-server-mainnet.uw.r.appspot.com",
-      "https://api.coingecko.com"
+      "https://api.coingecko.com",
+      "https://rpctest.meter.io"
     ]
   }
   if (!IS_PRODUCTION) {
