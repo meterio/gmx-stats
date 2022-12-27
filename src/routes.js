@@ -2,9 +2,10 @@ import { ethers } from 'ethers'
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 import { renderToString } from 'react-dom/server';
+import Token from '../abis/v1/Token.json'
 
-import { createHttpError }  from './utils';
-import { METERTEST, AVALANCHE } from './addresses'
+import { createHttpError } from './utils';
+import { METERTEST, AVALANCHE, getAddress } from './addresses'
 import { getPricesLimit, getLastUpdatedTimestamp, VALID_PERIODS } from './prices'
 
 import App from './App';
@@ -15,18 +16,30 @@ const IS_PRODUCTION = process.env.NODE_ENV === 'production'
 
 const assets = require(process.env.RAZZLE_ASSETS_MANIFEST);
 
+const { JsonRpcProvider } = ethers.providers
+const providers = {
+  [METERTEST]: new JsonRpcProvider('https://rpctest.meter.io'),
+}
+
+function getProvider(chainName) {
+  if (!(chainName in providers)) {
+    throw new Error(`Unknown chain ${chainName}`)
+  }
+  return providers[chainName]
+}
+
 const cssLinksFromAssets = (assets, entrypoint) => {
   return assets[entrypoint] ? assets[entrypoint].css ?
-  assets[entrypoint].css.map(asset=>
-    `<link rel="stylesheet" href="${asset}">`
-  ).join('') : '' : '';
+    assets[entrypoint].css.map(asset =>
+      `<link rel="stylesheet" href="${asset}">`
+    ).join('') : '' : '';
 };
 
 const jsScriptTagsFromAssets = (assets, entrypoint, extra = '') => {
   return assets[entrypoint] ? assets[entrypoint].js ?
-  assets[entrypoint].js.map(asset=>
-    `<script src="${asset}"${extra}></script>`
-  ).join('') : '' : '';
+    assets[entrypoint].js.map(asset =>
+      `<script src="${asset}"${extra}></script>`
+    ).join('') : '' : '';
 };
 
 const { formatUnits } = ethers.utils
@@ -51,11 +64,12 @@ export default function routes(app) {
     }
   })
 
-  app.get('/api/gmx-supply', async (req, res) => {
-    const apiResponse = await fetch('https://api.gmx.io/gmx_supply')
-    const data = (await apiResponse.text()).toString()
+  app.get('/api/gmx_supply', async (req, res) => {
+    const provider = getProvider(METERTEST)
+    const gmx = new ethers.Contract(getAddress(METERTEST, 'GMX'), Token.abi, provider);
+    const totalSupply = await gmx.totalSupply();
     res.set('Content-Type', 'text/plain')
-    res.send(formatUnits(data))
+    res.send(formatUnits(totalSupply))
   })
 
   app.get('/api/candles/:symbol', async (req, res, next) => {
@@ -64,7 +78,7 @@ export default function routes(app) {
       next(createHttpError(400, `Invalid period. Valid periods are ${Array.from(VALID_PERIODS)}`))
       return
     }
-    
+
     const validSymbols = new Set(['MTR', 'MTRG', 'BNB', 'UNI', 'LINK', 'AVAX'])
     const symbol = req.params.symbol
     if (!validSymbols.has(symbol)) {

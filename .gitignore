@@ -17,3 +17,4 @@ build.*
 .vscode
 
 *.pem
+package-lock.json
