@@ -71,6 +71,10 @@ export default function routes(app) {
     res.set('Content-Type', 'text/plain')
     res.send(formatUnits(totalSupply))
   })
+  app.get('/api/ui_version', async (req, res) => {
+    res.set('Content-Type', 'text/plain')
+    res.send('1.0')
+  })
 
   app.get('/api/candles/:symbol', async (req, res, next) => {
     const period = req.query.period?.toLowerCase()
