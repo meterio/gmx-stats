@@ -1,53 +1,41 @@
-export const TOKENS = [
-  {
-    symbol: 'BTC',
-    address: '0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c',
-    defaultPrice: 35000,
-    coingeckoId: 'bitcoin'
-  },
-  {
-    symbol: 'ETH',
-    address: '0x2170Ed0880ac9A755fd29B2688956BD959F933F8',
-    defaultPrice: 2000,
-    coingeckoId: 'ethereum'
-  },
-  {
-    symbol: 'BNB',
-    address: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
-    defaultPrice: 300,
-    coingeckoId: 'binancecoin'
-  },
-  {
-    symbol: 'USDG',
-    address: '0x85E76cbf4893c1fbcB34dCF1239A91CE2A4CF5a7',
-    defaultPrice: 1
-  },
-  {
-    symbol: 'BUSD',
-    address: '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56',
-    defaultPrice: 1,
-    stable: true 
-  },
-  {
-    symbol: 'USDT',
-    address: '0x55d398326f99059fF775485246999027B3197955',
-    defaultPrice: 1,
-    stable: true 
-  },
-  {
-    symbol: 'USDC',
-    address: '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d',
-    defaultPrice: 1,
-    stable: true 
+export const allTokens = {
+  metertest: {
+    MTR: {
+      name: "MTR",
+      address: "0xfAC315d105E5A7fe2174B3EB1f95C257A9A5e271",
+      decimals: 18,
+      priceFeed: "0xCd5CB72EF809059Fa10773c6a4E13C9aa7D1983f",
+      priceDecimals: 18,
+      fastPricePrecision: 1000,
+      maxCumulativeDeltaDiff: 0.10 * 10 * 1000 * 1000, // 10%
+      isStrictStable: false,
+      tokenWeight: 7000,
+      minProfitBps: 0,
+      maxUsdgAmount: 5 * 1000 *1000,
+      bufferAmount: 200000,
+      isStable: false,
+      isShortable: true,
+      maxGlobalLongSize: 1 * 1000 * 1000,
+      maxGlobalShortSize: 500 * 1000,
+      spreadBasisPoints: 0
+    },
+    MTRG: {
+      name: "MTRG",
+      address: "0x8a419ef4941355476cf04933e90bf3bbf2f73814",
+      decimals: 18,
+      priceFeed: "0x10312f9cc653c09E30789e053be322D17b0C7cF5",
+      priceDecimals: 18,
+      fastPricePrecision: 1000,
+      maxCumulativeDeltaDiff: 0.10 * 10 * 1000 * 1000, // 10%
+      isStrictStable: false,
+      tokenWeight: 20000,
+      minProfitBps: 0,
+      maxUsdgAmount: 30 * 1000 * 1000,
+      bufferAmount: 5500,
+      isStable: false,
+      isShortable: true,
+      maxGlobalLongSize: 15 * 1000 * 1000,
+      maxGlobalShortSize: 8 * 1000 * 1000
+    }
   }
-]
-
-export const TOKENS_BY_SYMBOL = TOKENS.reduce((memo, token) => {
-  memo[token.symbol] = token
-  return memo
-}, {})
-
-export const TOKENS_BY_ADDRESS = TOKENS.reduce((memo, token) => {
-  memo[token.address] = token
-  return memo
-}, {})
+}
