@@ -341,12 +341,12 @@ export default function routes(app) {
       actions[i] = {
         id: data.actions[i].id,
         data: {
-          params: data.volumes[i].params,
-          timestamp: data.volumes[i].timestamp,
-          account: data.volumes[i].account,
-          txhash: data.volumes[i].txhash,
-          action: data.volumes[i].action,
-          blockNumber: data.volumes[i].blockNumber,
+          params: data.actions[i].params,
+          timestamp: data.actions[i].timestamp,
+          account: data.actions[i].account,
+          txhash: data.actions[i].txhash,
+          action: data.actions[i].action,
+          blockNumber: data.actions[i].blockNumber,
         },
       };
     }
