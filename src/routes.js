@@ -4,6 +4,7 @@ import { StaticRouter } from "react-router-dom";
 import { renderToString } from "react-dom/server";
 import Token from "../abis/v1/Token.json";
 import Reader from "../abis/Reader.json";
+import IWitnetFeed from "../abis/IWitnetFeed.json";
 import { createHttpError } from "./utils";
 import { gql } from "@apollo/client";
 import { METERTEST, AVALANCHE, getAddress } from "./addresses";
@@ -154,6 +155,38 @@ export default function routes(app) {
     return infoTokens;
   }
 
+  app.get("/api/tokens", async (req, res) => {
+    const tokenArr = Object.values(allTokens.metertest);
+    const provider = getProvider(METERTEST);
+    const reader = new ethers.Contract(
+      getAddress(METERTEST, "Reader"),
+      Reader.abi,
+      provider
+    );
+    const vaultTokenInfo = await getInfoTokens();
+    let results = [];
+    for (let i = 0; i < tokenArr.length; i++) {
+      let t = vaultTokenInfo[tokenArr[i].address];
+      let token = {
+        id: t.address,
+        data: {
+          poolAmount: t.poolAmount.toString(),
+          reservedAmount: t.reservedAmount.toString(),
+          redemptionAmount: t.redemptionAmount.toString(),
+          weight: t.weight.toString(),
+          minPrice: t.minPrice.toString(),
+          maxPrice: t.maxPrice.toString(),
+          guaranteedUsd: t.guaranteedUsd.toString(),
+          maxPrimaryPrice: t.maxPrimaryPrice.toString(),
+          minPrimaryPrice: t.minPrimaryPrice.toString(),
+        },
+      };
+      results.push(token);
+    }
+    res.set("Content-Type", "text/plain");
+    res.send(results);
+  });
+
   app.get("/api/fees_summary", async (req, res) => {
     const tokenArr = Object.values(allTokens.metertest);
     const provider = getProvider(METERTEST);
@@ -245,9 +278,103 @@ export default function routes(app) {
     res.send(volumes);
   });
 
+  app.get("/api/prices", async (req, res) => {
+    const provider = getProvider(METERTEST);
+    const witnetFeed_MTR = new ethers.Contract(
+      getAddress(METERTEST, "IWitnetFeed_MTR"),
+      IWitnetFeed.abi,
+      provider
+    );
+    const witnetFeed_MTRG = new ethers.Contract(
+      getAddress(METERTEST, "IWitnetFeed_MTRG"),
+      IWitnetFeed.abi,
+      provider
+    );
+
+    const lastPrice_MTR = (await witnetFeed_MTR.lastPrice()).mul(1e12);
+    const lastPrice_MTRG = (await witnetFeed_MTRG.lastPrice()).mul(1e12);
+
+    res.set("Content-Type", "text/plain");
+    res.send({
+      [getAddress(METERTEST, "MTR")]: lastPrice_MTR.toString(),
+      [getAddress(METERTEST, "MTRG")]: lastPrice_MTRG.toString(),
+    });
+  });
+
   app.get("/api/ui_version", async (req, res) => {
     res.set("Content-Type", "text/plain");
     res.send("1.0");
+  });
+
+  app.get("/api/position_stats", async (req, res) => {
+    res.set("Content-Type", "text/plain");
+    res.send({
+      totalShortPositionCollaterals: "0",
+      totalLongPositionCollaterals: "0",
+      totalActivePositions: 5709,
+      totalShortPositionSizes: "0",
+      totalLongPositionSizes: "0",
+    });
+  });
+
+  async function getActions(where) {
+    const PROPS = "id action params timestamp account txhash blockNumber";
+    const getQuery = () => `{
+    actions(
+      first: 600
+      orderBy: timestamp
+      orderDirection: desc
+      where: { ${where} }
+    ) { ${PROPS} }
+  }`;
+    const query = getQuery();
+    const start = Date.now();
+    logger.info("requesting actions %s", where);
+    const { data } = await meterStatsClient.query({ query: gql(query) });
+    logger.info(
+      "request done in %sms loaded %s actions",
+      Date.now() - start,
+      data.actions.length
+    );
+    let actions = [];
+    for (let i = 0; i < data.actions.length; i++) {
+      actions[i] = {
+        id: data.actions[i].id,
+        data: {
+          params: data.volumes[i].params,
+          timestamp: data.volumes[i].timestamp,
+          account: data.volumes[i].account,
+          txhash: data.volumes[i].txhash,
+          action: data.volumes[i].action,
+          blockNumber: data.volumes[i].blockNumber,
+        },
+      };
+    }
+    return actions;
+  }
+
+  app.get("/api/actions", async (req, res) => {
+    const account = req.query.account?.toLowerCase() || null;
+    let where = "";
+    if (account != null) {
+      where = `account: ${account}`;
+    }
+    const actions = await getActions(where);
+
+    res.set("Content-Type", "text/plain");
+    res.send(actions);
+  });
+
+  app.get("/api/orders_indices", async (req, res) => {
+    const account = req.query.account?.toLowerCase() || null;
+    let where = "";
+
+    res.set("Content-Type", "text/plain");
+    res.send({
+      Swap: [],
+      Increase: [],
+      Decrease: [],
+    });
   });
 
   app.get("/api/candles/:symbol", async (req, res, next) => {
