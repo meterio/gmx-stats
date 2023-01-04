@@ -111,7 +111,7 @@ export default function routes(app) {
     );
     const totalSupply = await gmx.totalSupply();
     res.set("Content-Type", "text/plain");
-    res.send(formatUnits(totalSupply));
+    res.send(totalSupply);
   });
   app.get("/api/ui_version", async (req, res) => {
     res.set("Content-Type", "text/plain");
