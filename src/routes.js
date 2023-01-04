@@ -291,8 +291,8 @@ export default function routes(app) {
       provider
     );
 
-    const lastPrice_MTR = (await witnetFeed_MTR.lastPrice()).mul(1e12);
-    const lastPrice_MTRG = (await witnetFeed_MTRG.lastPrice()).mul(1e12);
+    const lastPrice_MTR = (await witnetFeed_MTR.lastPrice()).mul(1e12).mul(1e12);
+    const lastPrice_MTRG = (await witnetFeed_MTRG.lastPrice()).mul(1e12).mul(1e12);
 
     res.set("Content-Type", "text/plain");
     res.send({
